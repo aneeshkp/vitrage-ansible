@@ -1,0 +1,9 @@
+[Unit]
+Description=Vitrage Notifier Service
+After=vitrage-api.service
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/vitrage-notifier --config-file /etc/vitrage/vitrage.conf
+[Install]
+WantedBy=multi-user.target

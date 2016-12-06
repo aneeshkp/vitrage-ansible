@@ -1,0 +1,40 @@
+---
+ 
+- name: install dashboard
+  hosts: controllers  
+  remote_user: heat-admin
+  roles:
+    - install-dashboard
+
+
+- name: install python client
+  hosts: controllers
+  remote_user: heat-admin
+  roles:
+    - install-client
+
+- name: config controller nodes
+  hosts: controllers
+  remote_user: heat-admin
+  roles:
+    - config-controller
+
+- name: config compute nodes
+  hosts: compute
+  remote_user: heat-admin
+  roles:
+    - config-compute
+
+- name: create openstack service
+  hosts: master_controller
+  remote_user: heat-admin
+  roles:
+    - create-openstack_services
+
+
+- name: install vitrage
+  hosts: controllers
+  remote_user: heat-admin
+  roles:
+    - install-vitrage
+ 

@@ -1,0 +1,12 @@
+---
+#- include: haproxy.yaml
+---
+#nova 
+# Ensure "fav=lemonade is in section "[drinks]" in specified file
+- ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_driver  value=messagingv2 backup=yes
+- ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications backup=yes
+
+#neutron
+- ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_driver  value=messagingv2 backup=yes
+- ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications  backup=yes
+

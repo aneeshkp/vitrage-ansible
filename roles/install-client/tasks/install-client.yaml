@@ -1,0 +1,15 @@
+---
+- name: clean  of any old vitrage code
+  file: name={{ansible_env.HOME}}/python-vitrageclient state=absent force=yes
+  become: true
+
+- name: clone vitrage code
+  git: repo={{ vitrage_client_repo }} accept_hostkey=yes version={{ vitrage_branch }} dest={{ansible_env.HOME}}/python-vitrageclient
+  become: true
+
+- name: run install
+  shell: >
+   cd {{ansible_env.HOME}}/python-vitrageclient;
+   pip install -r requirments.txt;
+   python setup.py install
+  become: true

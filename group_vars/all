@@ -1,0 +1,14 @@
+vitrage_base_repo: http://github.com/openstack/vitrage
+vitrage_client_repo: http://github.com/openstack/python-vitrageclient
+vitrage_horizon_repo: http://github.com/openstack/vitrage-dashboard
+vitrage_branch: stable/newton
+
+overcloudrc: ~/overcloudrc
+vitrage_password: vitrage
+vitrage_port: 8999
+vitrage_project_name: admin
+vitrage_region: regionOne
+
+#haproxy_ip: 172.16.0.25
+
+haproxy_config: /etc/haproxy/haproxy.cfg

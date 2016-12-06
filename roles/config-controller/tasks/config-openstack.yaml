@@ -1,0 +1,89 @@
+---
+#nova 
+# Ensure "fav=lemonade is in section "[drinks]" in specified file
+- name : remove nova driver section 
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_driver  backup=yes
+  become: true
+
+- name : remove nova topics section 
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_topics  backup=yes
+  become: true
+
+- name : add nova driver section 
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_driver  value=messagingv2
+  become: true
+
+- name : add nova tiopics section 
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications
+  become: true
+
+#neutron
+- name : remove neutron driver section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_driver  backup=yes
+  become: true
+
+- name : remove neutron topics section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_topics  backup=yes
+  become: true
+
+
+- name : add neutron driver section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_driver  value=messagingv2
+  become: true
+
+- name : add neutron topics section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications
+  become: true
+
+
+#cinder
+- name : remove cinder driver section  
+  ini_file: dest=/etc/cinder/cinder.conf section=DEFAULT option=notification_driver backup=yes
+  become: true
+
+- name : remove cinder topics section 
+  ini_file: dest=/etc/cinder/cinder.conf section=DEFAULT option=notification_topics backup=yes
+  become: true
+
+- name : add cinder driver section 
+  ini_file: dest=/etc/cinder/cinder.conf section=DEFAULT option=notification_driver  value=messagingv2
+  become: true
+
+- name : add cinder topics section 
+  ini_file: dest=/etc/cinder/cinder.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications
+  become: true
+
+
+#heat
+- name : remove heat driver section 
+  ini_file: dest=/etc/heat/heat.conf section=DEFAULT option=notification_driver backup=yes
+  become: true
+
+- name : remove heat topics section 
+  ini_file: dest=/etc/heat/heat.conf section=DEFAULT option=notification_topics backup=yes
+  become: true
+
+- name : add heat drivers section 
+  ini_file: dest=/etc/heat/heat.conf section=DEFAULT option=notification_driver  value=messagingv2
+  become: true
+
+- name : add heat topics section 
+  ini_file: dest=/etc/heat/heat.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications
+  become: true
+
+
+- name : restart nova services
+  shell: >
+    for resource in $(sudo systemctl | grep nova | awk {'print $1'}); do sudo systemctl restart  $resource; done
+
+- name : restart neutron services
+  shell: >
+    for resource in $(sudo systemctl | grep neutron | awk {'print $1'}); do sudo systemctl restart  $resource; done
+
+- name : restart cinder services
+  shell: >
+    for resource in $(sudo systemctl | grep cinder | awk {'print $1'}); do sudo systemctl restart  $resource; done
+
+- name : restart heat services
+  shell: >
+    for resource in $(sudo systemctl | grep openstack-heat | awk {'print $1'}); do sudo systemctl restart  $resource; done    

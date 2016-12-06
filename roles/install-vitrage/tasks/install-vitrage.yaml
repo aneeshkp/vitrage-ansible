@@ -1,0 +1,103 @@
+---
+
+- name: install git 
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=present"
+  with_items:
+   - git
+  become: true
+
+- name: install pip
+  shell: >
+    easy_install pip
+  become: true
+
+- name: clean  of any old vitrage code
+  file: name={{ansible_env.HOME}}/vitrage state=absent force=yes
+  become: true
+
+- name: clone vitrage code
+  git: repo={{ vitrage_base_repo }} accept_hostkey=yes version={{ vitrage_branch }} dest={{ansible_env.HOME}}/vitrage
+
+- name: clean /var/log/vitrage  directory
+  stat: path=/var/log/vitrage
+  register: log_path
+  become: true
+
+- debug: var=log_path
+
+- file: path=/var/log/vitrage state=absent
+  when: log_path.stat.isdir is defined and log_path.stat.isdir == true
+  become: true
+
+
+- name: clean /etc/vitrage  directory
+  stat: path=/etc/vitrage
+  register: etc_path
+  become: true
+
+- debug: var=etc_path
+
+- file: path=/etc/vitrage state=absent
+  when: etc_path.stat.isdir is defined and etc_path.stat.isdir == true
+  become: true
+
+
+
+- name: make /etc/vitrage directory
+  file: path=/etc/vitrage state=directory mode=0644 owner=root group=root
+  become: true
+
+- name: make /var/log/vitrage directory
+  file: path=/var/log/vitrage state=directory mode=0644 owner=root group=root
+  become: true
+
+- name: make /var/log/vitrage directory
+  file: path=/var/log/vitrage/vitrage-api.log state=touch mode=0644 owner=root group=root
+  become: true
+
+  
+- name: make /var/cache/vitrage directory
+  file: path=/var/cache/vitrage state=directory mode=0755 owner=root group=root
+  become: true
+  
+- name: make /etc/vitrage/datasources_values directory
+  file: path=/etc/vitrage/datasources_values state=directory mode=0644
+  become: true
+
+- name: make /etc/vitrage/static_datasources directory
+  file: path=/etc/vitrage/static_datasources state=directory mode=0644
+  become: true
+  
+
+- name: run install
+  shell: >
+   pip install sympy;
+   cd {{ansible_env.HOME}}/vitrage;
+   pip install -r requirments.txt;
+   python setup.py install
+  become: true
+
+
+- name: copy configurations
+  shell: >
+   cd {{ansible_env.HOME}}/vitrage;
+   cp etc/vitrage/policy.json  /etc/vitrage/policy.json;
+   cp etc/vitrage/*.sample.json /etc/vitrage/;
+   cp etc/vitrage/datasources_values/*.yaml /etc/vitrage/datasources_values/;
+   cp etc/vitrage/api-paste.ini /etc/vitrage/
+  become: true
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+

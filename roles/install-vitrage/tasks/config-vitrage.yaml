@@ -1,0 +1,82 @@
+---
+- name : get haproxy url 
+  shell : >
+    grep -m1 "bind " {{haproxy_config}} | awk '{print $2}'| cut -d ':' -f 1
+  register: haproxy_ip_address
+  become: true  
+
+- name : get rabbitmq url 
+  shell : >
+    grep -m1 "ip" /etc/rabbitmq/rabbitmq.config | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' | awk {'print $1'}
+  register: rabbitmq_address
+  become: true  
+
+- name : get rabbitmq user 
+  shell : >
+    grep -m1 "default_user" /etc/rabbitmq/rabbitmq.config | awk {'print $2'}| egrep -o '[a-zA-Z]*' | awk {'print $1'}
+  register: rabbitmq_user  
+  become: true
+
+- name : get rabbitmq password 
+  shell : >
+    grep -m1 "default_pass" /etc/rabbitmq/rabbitmq.config | awk {'print $2'}| egrep -o '[a-zA-Z0-9]*' | awk {'print $1'}
+  register: rabbitmq_password      
+  become: true
+
+- name : get admin password 
+  shell : >
+    grep "OS_PASSWORD" ~/overcloudrc | cut -d "=" -f 2
+  register: openstack_admin_password      
+
+- name: copy vagrant file
+  sudo: yes
+  template: src=vitrage.conf.j2 dest=/etc/vitrage/vitrage.conf backup=yes mode=0644 force=yes
+
+
+
+- name: clean  vitrage-api systemd service
+  file: path=/usr/lib/systemd/system/vitrage.api.service state=absent
+  become: true
+  
+
+- name: clean vitrage-notifier systemd service
+  file: path=/usr/lib/systemd/system/vitrage.notifier.service state=absent
+  become: true
+  
+
+- name: clean vitrage-graph systemd service
+  file: path=/usr/lib/systemd/system/vitrage.graph.service state=absent
+  become: true
+
+- name: create vitrage-api systemd service
+  template: src=vitrage-api.service.j2 dest=/etc/systemd/system/vitrage-api.service mode=0644 seuser=unconfined_u force=yes
+  become: true
+  
+
+- name: create vitrage-notifier systemd service
+  template: src=vitrage-notifier.service.j2 dest=/etc/systemd/system/vitrage-notifier.service mode=0644 seuser=unconfined_u force=yes
+  become: true
+  
+
+- name: create vitrage-graph systemd service
+  template: src=vitrage-graph.service.j2 dest=/etc/systemd/system/vitrage-graph.service mode=0644 seuser=unconfined_u force=yes
+  become: true
+
+  
+
+- name: reload daemons
+  command: systemctl daemon-reload
+  become: true
+
+
+- name: enable vitrage systemd service
+  service: state=started enabled=yes name=vitrage-api
+  become: true
+
+- name: enable vitrage systemd service
+  service: state=started enabled=yes name=vitrage-notifier
+  become: true
+
+- name: enable vitrage systemd service
+  service: state=started enabled=yes name=vitrage-graph
+  become: true

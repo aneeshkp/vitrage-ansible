@@ -1,0 +1,93 @@
+---
+- hosts: localhost 
+  gather_facts: False
+
+
+  pre_tasks:
+    - name : store controller host variables
+      shell: >
+        source ~/stackrc;
+        nova list | grep controller | awk '{print $4  $12}' | sed  's/ctlplane=/.localadmin /g'
+      register: controller_hostname_list
+
+    - name : store controller host variables
+      shell: >
+        source ~/stackrc;
+        nova list | grep compute | awk '{print $4  $12}' | sed  's/ctlplane=/.localadmin /g'
+      register: compute_hostname_list
+
+    - name : get contoller ip
+      shell: >
+        source ~/stackrc;
+        nova list | grep controller | awk '{print $12}' | cut -d "=" -f 2
+      register: controller_list 
+
+    - name : get master contoller ip
+      shell: >
+        source ~/stackrc;
+        nova list | grep -m1 controller | awk '{print $12}' | cut -d "=" -f 2
+      register: master_controller
+  
+
+    - debug: var=controller_list.stdout_lines
+
+
+    - name : get compute  ip
+      shell: >
+        source ~/stackrc;
+        nova list | grep compute | awk '{print $12}' | cut -d "=" -f 2
+      register: compute_list 
+
+    - debug: var=compute_list.stdout_lines  
+
+
+    - name: add master ontroller nodes to master_controllers host group
+      add_host:
+        name: "{{master_controller.stdout}}" 
+        groups: master_controllers
+
+    - name: add controller nodes to controllers host group
+      add_host:
+        name: "{{item}}" 
+        groups: controllers
+      with_items: "{{controller_list.stdout_lines}}"
+
+    - name: add compute nodes to compute host group
+      add_host:
+        name: "{{item}}" 
+        groups: compute
+      with_items: "{{compute_list.stdout_lines}}"
+   
+    
+    
+- hosts: controllers
+  gather_facts: False
+  vars:
+  remote_user: heat-admin
+  tasks:
+   - name: Copy overcloudrc to controllers
+     # Copy a new "ntp.conf file into place, backing up the original if it differs from the copied version
+     copy: src=~/overcloudrc dest=~/overcloudrc mode=644 backup=yes
+   - blockinfile:
+       dest: /etc/resolv.conf
+       block: |
+         search oot.lab.eng.rdu2.redhat.com 
+         nameserver 10.10.160.1
+         nameserver 10.10.160.2
+     become: yes
+
+- hosts: compute
+  gather_facts: False
+  vars:
+  remote_user: heat-admin 
+  tasks:
+   - name: Copy overcloudrc to compute nodes
+     copy: src=~/overcloudrc dest=~/overcloudrc mode=644 backup=yes
+   - blockinfile:
+       dest: /etc/resolv.conf
+       block: | 
+         search oot.lab.eng.rdu2.redhat.com
+         nameserver 10.10.160.1
+         nameserver 10.10.160.2
+     become: yes
+

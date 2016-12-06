@@ -1,0 +1,9 @@
+[Unit]
+Description=Vitrage graph  Service
+After=vitrage-notifier.service
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/vitrage-graph --config-file /etc/vitrage/vitrage.conf
+[Install]
+WantedBy=multi-user.target

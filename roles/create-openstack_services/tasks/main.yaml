@@ -1,0 +1,41 @@
+- name: create service endpoinmt
+  shell: >
+    source {{ overcloudrc }};
+    openstack user create --password {{ vitrage_password }} vitrage
+  register: vitrage_database_user
+  failed_when: vitrage_database_user.stderr != '' and 'Duplicate Entry' not in vitrage_database_user.stderr
+
+
+- name: check for vitrage service ID
+  shell: >
+    source {{ overcloudrc }};
+    openstack service show vitrage | grep "| id" | awk '{print $4}'
+  register: vitrage_service_id_check
+
+- name: create vitrage service
+  shell: >
+    source {{ overcloudrc }};
+    openstack service create --name vitrage --description "Root Cause Analysis Service" rca
+  when: (vitrage_service_id_check.stdout == '')
+
+- name: acquire vitrage service ID
+  shell: >
+    source {{ overcloudrc }};
+    openstack service show vitrage | grep "| id" | awk '{print $4}'
+  register: vitrage_service_id
+
+- name: acquire controller IP
+  shell: pcs config | grep -m 1 "start ip-" | awk '{print $2}' | cut -d "-" -f 2
+  register: controller_ip
+
+- name: check for vitrage service ID
+  shell: >
+    source {{ overcloudrc }};
+    openstack endpoint show vitrage | grep "| id" | awk '{print $4}'
+  register: vitrage_endpoint_service_id_check
+
+- name: creat vitrage endpoints
+  shell: >
+    source {{ overcloudrc }};
+    openstack endpoint create --region {{ vitrage_region }} --publicurl 'http://{{ controller_ip.stdout }}:{{ vitrage_port }}/' --adminurl 'http://{{ controller_ip.stdout }}:{{ vitrage_port }}/' --internalurl 'http://{{ controller_ip.stdout }}:{{ vitrage_port }}/' {{ vitrage_service_id.stdout }}
+  when: (vitrage_endpoint_service_id_check.stdout == '')

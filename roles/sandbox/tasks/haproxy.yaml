@@ -1,0 +1,42 @@
+---
+
+- debug: var=hostvars['localhost']['controller_hostname_list']['stdout_lines']
+
+- name: remove vitrage block in /tmp/haproxy/haproxy.cfg
+  blockinfile:
+    dest: "{{haproxy_config}}"
+    marker: '# {mark} vitrage marker'
+    content: ""
+    state: absent
+  become: true
+
+
+- name: insert/update vitrage block in /tmp/haproxy/haproxy.cfg
+  blockinfile:
+    dest: "{{haproxy_config}}"
+    marker: '# {mark} vitrage marker'
+    block: |
+      listen vitrage
+        bind  {{haproxy_ip}}:8999 transparent
+  become: true
+
+- name: insert/update vitrage block in /tmp/haproxy/haproxy.cfg
+  blockinfile:
+    dest: "{{haproxy_config}}"
+    marker: "#DELETE#"
+    insertbefore : '# END vitrage marker'
+    block: |
+       #DELETE#    
+        server {{item}}:8999 check fall 5 inter 2000 rise 2
+  with_items: "{{hostvars['localhost']['controller_hostname_list']['stdout_lines']}}"
+  become: true
+
+- name: Remove markers ##DELETE##
+  shell: >
+    sed -i  '/#DELETE#/d' "{{haproxy_config}}"
+  become: true 
+
+
+- name : restart haproxy services
+  shell: >
+    sudo systemctl restart haproxy

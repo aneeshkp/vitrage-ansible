@@ -1,0 +1,4 @@
+---
+- include: install-vitrage.yaml
+- include: config-vitrage.yaml
+- include: config_haproxy.yaml

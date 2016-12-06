@@ -1,0 +1,48 @@
+---
+#nova 
+# Ensure "fav=lemonade is in section "[drinks]" in specified file
+#remove
+- name : remove nova driver option
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_driver backup=yes
+  become: true
+
+- name: remove nova topic section
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_topics backup=yes
+  become: true
+#add
+- name: add nova driver section
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_driver  value=messagingv2
+  become: true
+
+- name : add nova topic section 
+  ini_file: dest=/etc/nova/nova.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications
+  become: true
+
+#neutron
+#remove
+- name : remove neutron driver section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_driver
+  become: true
+
+- name : remove neutron topic section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_topics
+  become: true
+#add
+- name : add neutron driver section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_driver  value=messagingv2 backup=yes
+  become: true
+
+- name : add neutron topic section 
+  ini_file: dest=/etc/neutron/neutron.conf section=DEFAULT option=notification_topics value=notifications,vitrage_notifications backup=yes
+  become: true
+
+
+- name : restart nova services
+  shell: >
+    for resource in $(sudo systemctl | grep nova | awk {'print $1'}); do sudo systemctl restart  $resource; done
+
+- name : restart neutron services
+  shell: >
+    for resource in $(sudo systemctl | grep neutron | awk {'print $1'}); do sudo systemctl restart  $resource; done
+
+

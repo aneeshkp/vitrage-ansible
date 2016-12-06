@@ -1,0 +1,8 @@
+[Unit]
+Description=Vitrage Api  Service
+[Service]
+Type=simple
+User=root
+ExecStart= /usr/bin/vitrage-api  --config-file /etc/vitrage/vitrage.conf
+[Install]
+WantedBy=multi-user.target
