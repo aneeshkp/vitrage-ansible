@@ -12,3 +12,5 @@ vitrage_region: regionOne
 #haproxy_ip: 172.16.0.25
 
 haproxy_config: /etc/haproxy/haproxy.cfg
+
+nagios-config: /etc/vitrage/nagios_conf.yaml

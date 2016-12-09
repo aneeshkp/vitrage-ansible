@@ -1,0 +1,45 @@
+---
+
+- debug: var=hostvars['localhost']['controller_hostname_list']['stdout_lines']
+- debug: var=hostvars['localhost']['compute_hostname_list']['stdout_lines']
+
+
+- name: copy vagrant file
+  sudo: yes
+  template: src=vitrage-nagios-conf.j2 dest=/etc/vitrage/nagios_conf.yaml mode=0644 force=yes
+
+
+- name: remove nagios block in /etc/vitrage/nagios_conf.yaml
+  blockinfile:
+    dest: "{{nagios-config:}}"
+    marker: '# {mark} nagios-config marker'
+    content: ""
+    state: absent
+  become: true
+
+
+- name: insert/update nagios block in /etc/vitrage/nagios_conf.yaml
+  blockinfile:
+    dest: "{{nagios-config:}}"
+    marker: '# {mark} nagios-config marker'
+    block: |
+      nagios:
+  become: true
+
+- name: insert/update nagios block in /etc/vitrage/nagios_conf.yaml
+  blockinfile:
+    dest: "{{nagios-config:}}"
+    marker: "#DELETE#"
+    insertbefore : '# END nagios-config marker'
+    block: |
+       #DELETE#    
+          - nagios_host: {{item}}
+            type: nova.host
+            name: {{item}}
+  with_items: "{{hostvars['localhost']['compute_hostname_list']['stdout_lines']}}"
+  become: true
+
+- name: Remove markers ##DELETE##
+  shell: >
+    sed -i  '/#DELETE#/d' "{{nagios-config:}}"
+  become: true 

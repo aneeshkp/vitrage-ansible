@@ -436,10 +436,10 @@ user = nagiosadmin
 password = redhat 
 
 # Nagios url (string value)
-#url =
+url = http://{{haproxy_ip_address.stdout}}:54321/my_site/nagios/cgi-bin/status.cgi
 
 # Nagios configuration file (string value)
-#config_file = /etc/vitrage/nagios_conf.yaml
+config_file = /etc/vitrage/nagios_conf.yaml
 
 
 [nova.host]
