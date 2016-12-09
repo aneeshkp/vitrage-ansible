@@ -23,7 +23,7 @@
     marker: '# {mark} vitrage marker'
     block: |
       listen vitrage
-        bind  {{haproxy_ip_address}}:8999 transparent
+        bind  {{haproxy_ip_address.stdout}}:8999 transparent
   become: true
 
 - name: insert/update vitrage block in /tmp/haproxy/haproxy.cfg
