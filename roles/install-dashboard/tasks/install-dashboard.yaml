@@ -19,8 +19,8 @@
 - name: copy configurations
   shell: >
    cd {{ansible_env.HOME}}/vitrage-dashboard;
-   cp -a vitragedashboard/enabled/*   /usr/share/openstack_dashboard/openstack_dashboard/enabled/;
-   cp -a vitrageclient/api/*   /usr/share/openstack_dashboard/openstack_dashboard/api/;
+   cp -a vitragedashboard/enabled/*   /usr/share/openstack-dashboard/openstack_dashboard/enabled/;
+   cp -a vitrageclient/api/*   /usr/share/openstack-dashboard/openstack_dashboard/api/;
    cp -a vitragedashboard/static /usr/share/openstack-dashboard;
    chcon -Rv --type=usr_t /usr/share/openstack-dashboard/openstack_dashboard/api
   become: true

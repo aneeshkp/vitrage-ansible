@@ -1,6 +1,8 @@
 [DEFAULT]
 debug = true
-#rabbit_hosts=172.16.0.24,172.16.0.22,172.16.0.35
+{% for host in groups['controllers'] %}
+rabbit_hosts={{host}}{% if !loop.last %}, {% endif %}
+{% endfor %}  
 rpc_backend=rabbit
 rabbit_userid={{rabbitmq_user.stdout}}
 rabbit_password={{rabbitmq_password.stdout}}
