@@ -26,7 +26,7 @@
       shell: >
         source ~/stackrc;
         nova list | grep -m1 controller | awk '{print $12}' | cut -d "=" -f 2
-      register: master_controller
+      register: master_controller_item
   
 
     - debug: var=controller_list.stdout_lines
@@ -43,8 +43,8 @@
 
     - name: add master ontroller nodes to master_controllers host group
       add_host:
-        name: "{{master_controller.stdout}}" 
-        groups: master_controllers
+        name: "{{master_controller_item.stdout}}" 
+        groups: master_controller
 
     - name: add controller nodes to controllers host group
       add_host:
