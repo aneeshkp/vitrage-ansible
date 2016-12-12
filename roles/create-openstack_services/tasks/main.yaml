@@ -3,7 +3,7 @@
     source {{ overcloudrc }};
     openstack user create --password {{ vitrage_password }} vitrage
   register: vitrage_database_user
-  failed_when: vitrage_database_user.stderr != '' and 'Duplicate Entry' not in vitrage_database_user.stderr
+  failed_when: vitrage_database_user.stderr != '' and 'Duplicate Entry' in vitrage_database_user.stderr
 
 
 - name: check for vitrage service ID
