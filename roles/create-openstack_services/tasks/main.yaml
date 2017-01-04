@@ -5,6 +5,44 @@
   register: vitrage_database_user
   failed_when: vitrage_database_user.stderr != '' and 'Duplicate Entry' in vitrage_database_user.stderr
 
+- name : get haproxy url 
+  shell : >
+    grep -m1 "bind " {{haproxy_config}} | awk '{print $2}'| cut -d ':' -f 1
+  register: haproxy_ip_address
+  become: true  
+
+- name: create vitrage user
+  shell: >
+    source {{ overcloudrc }};
+    openstack user create --password vitrage vitrage
+  register: vitrage_database_user
+  ignore_errors: yes
+  
+
+- name: give Tacker user admin role
+  shell: >
+    source {{ overcloudrc }};
+    openstack role add --project admin --user vitrage admin
+  register: vitrage_database_user_admin_role
+  ignore_errors: yes
+  
+
+- name: Add Vitrage user service role
+  shell: >
+    source {{ overcloudrc }};
+    openstack role add --project service --user vitrage admin
+  register: vitrage_database_user_service_role
+  ignore_errors: yes
+  
+
+- name: acquire vitrage service ID
+  shell: >
+    source {{ overcloudrc }};
+    openstack project create --description "vitrage project" vitrage
+  register: vitrage_project_id
+  ignore_errors: yes
+
+
 
 - name: check for vitrage service ID
   shell: >
@@ -24,9 +62,6 @@
     openstack service show vitrage | grep "| id" | awk '{print $4}'
   register: vitrage_service_id
 
-- name: acquire controller IP
-  shell: pcs config | grep -m 1 "start ip-" | awk '{print $2}' | cut -d "-" -f 2
-  register: controller_ip
 
 - name: check for vitrage service ID
   shell: >
@@ -37,5 +72,5 @@
 - name: creat vitrage endpoints
   shell: >
     source {{ overcloudrc }};
-    openstack endpoint create --region {{ vitrage_region }} --publicurl 'http://{{ controller_ip.stdout }}:{{ vitrage_port }}/' --adminurl 'http://{{ controller_ip.stdout }}:{{ vitrage_port }}/' --internalurl 'http://{{ controller_ip.stdout }}:{{ vitrage_port }}/' {{ vitrage_service_id.stdout }}
+    openstack endpoint create --region {{ vitrage_region }} --publicurl 'http://{{ haproxy_ip_address.stdout }}:{{ vitrage_port }}/' --adminurl 'http://{{ haproxy_ip_address.stdout }}:{{ vitrage_port }}/' --internalurl 'http://{{ haproxy_ip_address.stdout }}:{{ vitrage_port }}/' {{ vitrage_service_id.stdout }}
   when: (vitrage_endpoint_service_id_check.stdout == '')

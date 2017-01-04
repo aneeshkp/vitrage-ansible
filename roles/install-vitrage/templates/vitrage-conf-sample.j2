@@ -1,5 +1,5 @@
 [DEFAULT]
-
+#debug = true
 #
 # From oslo.log
 #
@@ -37,7 +37,7 @@
 # (Optional) The base directory used for relative log_file  paths. This option
 # is ignored if log_config_append is set. (string value)
 # Deprecated group/name - [DEFAULT]/logdir
-#log_dir = <None>
+log_dir = /var/log/vitrage
 
 # Uses logging handler designed to watch file system. When log file is moved or
 # removed this handler will open a new log file with specified path
@@ -79,9 +79,6 @@
 
 # List of package logging levels in logger=LEVEL pairs. This option is ignored
 # if log_config_append is set. (list value)
-#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN,taskflow=WARN,keystoneauth=WARN,oslo.cache=INFO,dogpile.core.dogpile=INFO
-
-# Enables or disables publication of error events. (boolean value)
 #publish_errors = false
 
 # The format for an instance that is passed with the log message. (string
@@ -107,13 +104,6 @@ aodh_version = 2
 
 # The topic vitrage listens on (string value)
 #rpc_topic = rpcapiv1
-
-[oslo_messaging_rabbit]
-rabbit_hosts={{groups['controllers']|replace("u","")|replace("',",":5672")|replace("'","")|replace("[","")|replace("]","")|replace(" ","")}}
-#rpc_backend=rabbit
-rabbit_userid={{rabbitmq_user.stdout}}
-rabbit_password={{rabbitmq_password.stdout}}
-
 
 
 [aodh]
@@ -145,7 +135,7 @@ changes_interval = 30
 #port = 8999
 
 # The listen IP for the vitrage API server. (string value)
-host = {{ ansible_default_ipv4.address }}
+host = 172.16.0.31 
 
 # Configuration file for WSGI definition of API. (string value)
 #paste_config = api-paste.ini
@@ -155,7 +145,7 @@ host = {{ ansible_default_ipv4.address }}
 #workers = 1
 
 # Toggle Pecan Debug Middleware. (boolean value)
-#pecan_debug = false
+pecan_debug = true 
 
 # Toggle mock file for debugging. (boolean value)
 #use_mock_file = false
@@ -181,6 +171,11 @@ host = {{ ansible_default_ipv4.address }}
 # Minimum value: 1
 #initialization_max_retries = 30
 
+[oslo_messaging_rabbit]
+rabbit_userid=guest
+rabbit_password=BRFYr9BFMQNjuyX2GmjY8yDWJ
+rabbit_use_ssl=False
+rabbit_hosts=172.16.0.31:5672,172.16.0.28:5672,172.16.0.30:5672
 
 [cors]
 
@@ -245,37 +240,27 @@ host = {{ ansible_default_ipv4.address }}
 #
 
 # A path for the configuration files of the data sources values (string value)
-datasources_values_dir = /etc/vitrage/datasources_values
+datasources_values_dir = /etc/vitrage/datasources_values/
 
 
-[evaluator]
-
-#
-# From vitrage
-#
-
-# A path for the templates used by the evaluator (string value)
-templates_dir = /etc/vitrage/templates
-
-# The topic that vitrage-evaluator uses for alarm notifications messages.
-# (string value)
-notifier_topic = vitrage.evaluator
 
 
 [keystone_authtoken]
-memcached_servers = {{groups['controllers']|replace("u","")|replace("',",":11211")|replace("'","")|replace("[","")|replace("]","")|replace(" ","")}}
+memcached_servers = 172.16.0.31:11211,172.16.0.28:11211,172.16.0.30:11211 
 signing_dir = /var/cache/vitrage
 cafile = /opt/stack/data/ca-bundle.pem
-auth_uri = http://{{haproxy_ip_address.stdout}}:35357
+auth_uri = http://172.16.0.21:35357
 project_domain_name = default
 project_domain_id=default
 project_name = service
 user_domain_name = default
 password =vitrage 
 username = vitrage
-auth_url = http://{{haproxy_ip_address.stdout}}:5000/v3
+auth_url = http://172.16.0.21:5000/v3
 auth_type =password
 region_name= regionOne
+
+
 
 
 #
@@ -314,7 +299,7 @@ region_name= regionOne
 #cafile = <None>
 
 # Verify HTTPS connections. (boolean value)
-#insecure = false
+#insecure = false---
 
 # The region in which the identity server can be found. (string value)
 #region_name = <None>
@@ -404,7 +389,7 @@ region_name= regionOne
 
 # Authentication type to load (unknown value)
 # Deprecated group/name - [DEFAULT]/auth_plugin
-#auth_type = <None>
+#auth_type = password
 
 # Config Section from which to load plugin specific options (unknown value)
 #auth_section = <None>
@@ -417,26 +402,26 @@ region_name= regionOne
 #
 
 # Nagios plugin transformer class path (string value)
-#transformer = vitrage.datasources.nagios.transformer.NagiosTransformer
+transformer = vitrage.datasources.nagios.transformer.NagiosTransformer
 
 # Nagios plugin driver class path (string value)
-#driver = vitrage.datasources.nagios.driver.NagiosDriver
+driver = vitrage.datasources.nagios.driver.NagiosDriver
 
 # interval between checking changes in nagios datasource (integer value)
 # Minimum value: 30
 #changes_interval = 30
 
 # Nagios user name (string value)
-#user = nagiosadmin
+user = nagiosadmin
 
 # Nagios user password (string value)
-#password = redhat
+password = redhat 
 
 # Nagios url (string value)
-#url = http://{{haproxy_ip_address.stdout}}/nagios/cgi-bin/status.cgi
+url = http://172.16.0.21/nagios/cgi-bin/status.cgi
 
 # Nagios configuration file (string value)
-#config_file = /etc/vitrage/nagios_conf.yaml
+config_file = /etc/vitrage/nagios_conf.yaml
 
 
 [nova.host]
@@ -505,7 +490,7 @@ driver = vitrage.datasources.nova.zone.driver.ZoneDriver
 
 # The JSON file that defines policies. (string value)
 # Deprecated group/name - [DEFAULT]/policy_file
-#policy_file = policy.json
+policy_file = /etc/vitrage/policy.json
 
 # Default rule. Enforced when a requested rule is not found. (string value)
 # Deprecated group/name - [DEFAULT]/policy_default_rule
@@ -523,7 +508,7 @@ driver = vitrage.datasources.nova.zone.driver.ZoneDriver
 [service_credentials]
 
 #
-# From vitrage
+# From vitrage2
 #
 
 # Region name to use for OpenStack service endpoints. (string value)
@@ -539,12 +524,11 @@ auth_type =v3password
 username = admin
 user_domain_id = default
 project_domain_id = default 
-password = {{openstack_admin_password.stdout}}
+password = nxb62xe9ea6XgwfXsvaAuHrnu
 project_name = admin
 region_name = regionOne
-auth_url = http://{{haproxy_ip_address.stdout}}:5000/v3
-
-
+auth_url = http://172.16.0.21:5000/v3
+ 
 
 [static_physical]
 
@@ -567,18 +551,87 @@ changes_interval = 30
 directory = /etc/vitrage/static_plugins
 
 # Static physical entity types list (list value)
-#entities = switch
+entities = switch
 
 
 [datasources]
+types = nagios,nova.host,nova.instance,nova.zone,static_physical,aodh
 
 #
 # From vitrage
 #
 
 # interval between full snapshots (integer value)
-# Minimum value: 10
-snapshots_interval = 10
+#allow_headers = Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma
+
+
+[entity_graph]
+
+#
+# From vitrage
+#
+
+# A path for the configuration files of the data sources values (string value)
+datasources_values_dir = /etc/vitrage/datasources_values
+
+
+[evaluator]
+
+#
+# From vitrage
+#
+
+# A path for the templates used by the evaluator (string value)
+templates_dir = /opt/vitrage/templates/
+
+# The topic that vitrage-evaluator uses for alarm notifications messages.
+# (string value)
+notifier_topic = vitrage.evaluator
+
+
+#
+# From oslo.log
+#
+
+# If set to true, the logging level will be set to DEBUG instead of the default
+# INFO level. (boolean value)
+debug = true
+
+# If set to false, the logging level will be set to WARNING instead of the
+# default INFO level. (boolean value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#verbose = true
+
+# The name of a logging configuration file. This file is appended to any
+# existing logging configuration files. For details about logging configuration
+# files, see the Python logging module documentation. Note that when logging
+# configuration files are used then all logging configuration is set in the
+# configuration file and other logging configuration options are ignored (for
+# example, logging_context_format_string). (string value)
+# Deprecated group/name - [DEFAULT]/log_config
+#log_config_append = <None>
+
+# Defines the format string for %%(asctime)s in log records. Default:
+# %(default)s . This option is ignored if log_config_append is set. (string
+# value)
+#log_date_format = %Y-%m-%d %H:%M:%S
+
+# (Optional) Name of log file to send logging output to. If no default is set,
+# logging will go to stderr as defined by use_stderr. This option is ignored if
+# log_config_append is set. (string value)
+# Deprecated group/name - [DEFAULT]/logfile
+#log_file = <None>
+
+# (Optional) The base directory used for relative log_file  paths. This option
+# is ignored if log_config_append is set. (string value)
+# Deprecated group/name - [DEFAULT]/logdir
+log_dir = /var/log/vitrage
+
+# Uses logging handler designed to watch file system. When log file is moved or
+# removed this handler will open a new log file with specified path
+# instantaneously. It makes sense only if log_file option is specified and
+
 
 # Names of supported plugins (list value)
-types = nova.host,nova.instance,nova.zone,static_physical,aodh
+#types = nagios,nova.host,nova.instance,nova.zone,static_physical,aodh

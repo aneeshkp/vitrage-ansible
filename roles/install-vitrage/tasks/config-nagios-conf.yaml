@@ -33,7 +33,7 @@
     insertbefore : '# END nagios-config marker'
     block: |
        #DELETE#    
-          - nagios_host: {{item}}
+        - nagios_host: {{item}}
             type: nova.host
             name: {{item}}
   with_items: "{{hostvars['localhost']['compute_hostname_list']['stdout_lines']}}"
