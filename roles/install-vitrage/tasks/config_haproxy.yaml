@@ -23,7 +23,7 @@
     marker: '# {mark} vitrage marker'
     block: |
       listen vitrage
-        bind  {{haproxy_ip_address.stdout}}:8999 transparent
+      bind  {{haproxy_ip_address.stdout}}:8999 transparent
   become: true
 
 - name: insert/update vitrage block in /tmp/haproxy/haproxy.cfg
@@ -33,7 +33,7 @@
     insertbefore : '# END vitrage marker'
     block: |
        #DELETE#    
-          server {{item}}:8999 check fall 5 inter 2000 rise 2
+        server {{item}}:8999 check fall 5 inter 2000 rise 2
   with_items: "{{hostvars['localhost']['controller_hostname_list']['stdout_lines']}}"
   become: true
 

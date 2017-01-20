@@ -32,12 +32,12 @@
 # logging will go to stderr as defined by use_stderr. This option is ignored if
 # log_config_append is set. (string value)
 # Deprecated group/name - [DEFAULT]/logfile
-#log_file = <None>
+log_file = vitrage.log
 
 # (Optional) The base directory used for relative log_file  paths. This option
 # is ignored if log_config_append is set. (string value)
 # Deprecated group/name - [DEFAULT]/logdir
-#log_dir = <None>
+log_dir = /var/log/vitrage
 
 # Uses logging handler designed to watch file system. When log file is moved or
 # removed this handler will open a new log file with specified path
@@ -109,7 +109,7 @@ aodh_version = 2
 #rpc_topic = rpcapiv1
 
 [oslo_messaging_rabbit]
-rabbit_hosts={{groups['controllers']|replace("u","")|replace("',",":5672")|replace("'","")|replace("[","")|replace("]","")|replace(" ","")}}
+rabbit_hosts={{groups['controllers']|replace("u","")|replace("']",":5672")|replace("',",":5672")|replace("'","")|replace("[","")|replace(" ","")}}
 #rpc_backend=rabbit
 rabbit_userid={{rabbitmq_user.stdout}}
 rabbit_password={{rabbitmq_password.stdout}}
@@ -263,7 +263,7 @@ notifier_topic = vitrage.evaluator
 
 
 [keystone_authtoken]
-memcached_servers = {{groups['controllers']|replace("u","")|replace("',",":11211")|replace("'","")|replace("[","")|replace("]","")|replace(" ","")}}
+memcached_servers = {{groups['controllers']|replace("u","")|replace("']",":11211")|replace("',",":11211")|replace("'","")|replace("[","")|replace(" ","")}}
 signing_dir = /var/cache/vitrage
 cafile = /opt/stack/data/ca-bundle.pem
 auth_uri = http://{{haproxy_ip_address.stdout}}:35357
